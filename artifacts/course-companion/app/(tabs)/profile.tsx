@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
@@ -91,7 +91,7 @@ export default function ProfileScreen() {
 
   if (!session) {
     return (
-      <KeyboardAwareScrollView
+      <KeyboardAwareScrollViewCompat
         style={[styles.container, { backgroundColor: colors.background }]}
         contentContainerStyle={{ paddingTop: topPad + 16, paddingBottom: bottomPad, flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
@@ -178,12 +178,12 @@ export default function ProfileScreen() {
             )}
           </TouchableOpacity>
         </View>
-      </KeyboardAwareScrollView>
+      </KeyboardAwareScrollViewCompat>
     );
   }
 
   return (
-    <KeyboardAwareScrollView
+    <KeyboardAwareScrollViewCompat
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingTop: topPad + 16, paddingBottom: bottomPad }}
       showsVerticalScrollIndicator={false}
@@ -278,7 +278,7 @@ export default function ProfileScreen() {
           Log Out
         </Text>
       </TouchableOpacity>
-    </KeyboardAwareScrollView>
+    </KeyboardAwareScrollViewCompat>
   );
 }
 

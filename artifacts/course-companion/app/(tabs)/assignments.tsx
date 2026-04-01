@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase, Assignment } from '@/lib/supabase';
@@ -84,7 +84,7 @@ export default function AssignmentsScreen() {
   const bottomPad = Platform.OS === 'web' ? 100 : insets.bottom + 24;
 
   return (
-    <KeyboardAwareScrollView
+    <KeyboardAwareScrollViewCompat
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingTop: topPad + 16, paddingBottom: bottomPad }}
       refreshControl={
@@ -181,7 +181,7 @@ export default function AssignmentsScreen() {
       {assignments.map(a => (
         <AssignmentCard key={a.id} assignment={a} />
       ))}
-    </KeyboardAwareScrollView>
+    </KeyboardAwareScrollViewCompat>
   );
 }
 
