@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "Course Companion"
+version = "1.0.0"
+id = "artifacts/course-companion"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/" ]
+localPort = 18773
+
+[services.development]
+run = "pnpm --filter @workspace/course-companion run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/course-companion", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/course-companion", "run", "serve" ]
+
+[services.env]
+PORT = "18773"
+BASE_PATH = "/"

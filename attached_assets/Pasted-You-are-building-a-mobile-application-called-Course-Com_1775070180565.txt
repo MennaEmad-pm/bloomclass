@@ -1,0 +1,201 @@
+You are building a mobile application called "Course Companion" using React Native with Expo,
+deployable via Expo Go. The project must be set up and runnable on Replit.
+
+---
+
+## ⚙️ TECHNICAL SETUP
+
+- Framework: React Native with Expo (managed workflow)
+- Initialize with: npx create-expo-app@latest CourseCompanion
+- Navigation: Expo Router (file-based routing) OR React Navigation (stack + tab)
+- Backend/Database: Supabase (auth + database + realtime)
+- Styling: React Native StyleSheet (no Tailwind — not supported in RN)
+- Icons: @expo/vector-icons (Ionicons)
+- Notifications/Toasts: react-native-toast-message
+- Forms: controlled components with useState
+- Environment variables: store Supabase URL and anon key in app.config.js or .env
+
+Make sure the app runs with "expo start" and can be scanned via Expo Go on a physical device.
+
+---
+
+## 🎨 DESIGN SYSTEM (React Native)
+
+Implement a consistent design token file (theme.js) with:
+
+Colors:
+  - primary: '#C9748A'       // dusty rose
+  - secondary: '#D4795A'     // terracotta
+  - accent: '#C9A96E'        // soft gold
+  - background: '#FAF3EE'    // warm cream
+  - surface: '#FFFAF7'       // warm white
+  - textDark: '#3D2B30'      // deep warm brown
+  - textMuted: '#8C6B72'     // muted mauve
+  - cardBorder: '#EDD9CF'    // soft border
+
+Fonts:
+  Use expo-google-fonts:
+  - @expo-google-fonts/playfair-display  → headings
+  - @expo-google-fonts/dm-sans           → body text
+
+Style rules:
+  - borderRadius: 16 for cards, 12 for buttons, 24 for modals
+  - Soft shadows on all cards (shadowColor, shadowOpacity: 0.08)
+  - Generous padding (16–24px)
+  - Subtle warm gradient backgrounds using expo-linear-gradient
+
+---
+
+## 👤 USER ROLES
+
+### Student
+- Sign up with email (unique) + password
+- Profile: Full Name, LinkedIn URL, Current Position (default: "Student")
+- Can view all course content
+- Can submit assignments
+
+### Admin (Menna Emad)
+- Identified by isAdmin: true flag in Supabase "profiles" table
+- Can edit each session's title, presentation link, and notes
+- Admin controls hidden from regular students
+
+---
+
+## 🗄️ SUPABASE SCHEMA
+
+Create these tables:
+
+profiles:
+  - id (uuid, FK → auth.users)
+  - email (text)
+  - full_name (text)
+  - linkedin_url (text)
+  - current_position (text, default: 'Student')
+  - is_admin (boolean, default: false)
+
+sessions:
+  - id (int, 1–5)
+  - title (text)
+  - presentation_url (text, nullable)
+  - notes (text, nullable)
+
+assignments:
+  - id (uuid)
+  - student_name (text)
+  - group_name (text)
+  - task_link (text)
+  - submitted_at (timestamp, default: now())
+
+Enable Row Level Security (RLS):
+  - Students can read all sessions and assignments
+  - Only admin can update sessions
+  - Any authenticated user can insert assignments
+  - Users can only update their own profile
+
+---
+
+## 📱 APP STRUCTURE
+
+Use bottom tab navigation with 3 tabs:
+  1. 🏠 Home
+  2. 📝 Assignments
+  3. 👤 Profile
+
+Plus a Login / Sign Up screen (shown when not authenticated).
+
+---
+
+## 📄 SCREEN 1: HOME TAB
+
+### Subsection — About the Instructor
+Styled card with:
+  - Circular avatar with initials "ME" (dusty rose background)
+  - Name: Menna Emad
+  - Years of Experience: 12 years
+  - LinkedIn button → opens https://www.linkedin.com/in/mennatallah-emad/ in browser
+  - Bio: "A seasoned professional with 12 years of experience, passionate about
+    education and empowering the next generation of practitioners."
+
+### Subsection — Course Rules
+Collapsible or scrollable list. Rules:
+  1. Respect all participants and maintain a safe, inclusive space.
+  2. Be punctual — join sessions on time and notify if you'll be late.
+  3. Keep your camera on during live sessions when possible.
+  4. Engage actively: ask questions, participate in discussions.
+  5. Submit assignments before stated deadlines.
+  6. No plagiarism — all work must be your own or properly attributed.
+  7. Be constructive in feedback, both giving and receiving.
+  8. Keep course materials confidential.
+
+### Subsection — Feedback Form Banner
+Prominent tappable card/button with icon:
+  Label: "Share Your Session Feedback →"
+  Opens: https://docs.google.com/forms/d/e/1FAIpQLSe5yROgVNzxE2FFT7Rzai_PFsvWIhjejcF_mA3lbwdJoaURLg/viewform
+  Use Linking.openURL()
+
+### Subsection — Sessions (5 cards)
+Render 5 session cards fetched from Supabase. Each card:
+  - Session number badge + title
+  - "View Presentation" button → opens URL (grayed out + "Coming Soon" if null)
+  - Notes text (or italic placeholder "Notes will be added after the session")
+  - If admin is logged in: show "Edit Session" button
+    → opens a modal with fields: Title, Presentation URL, Notes
+    → saves to Supabase on submit
+
+---
+
+## 📄 SCREEN 2: ASSIGNMENTS TAB
+
+Top section — Submission Form:
+  - Student Name field (pre-filled from profile if logged in)
+  - Group Name field
+  - Assignment Link field (URL)
+  - "Submit Assignment" button
+  - Validate all fields before submit
+  - On success: show toast "Assignment submitted!" and refresh list
+
+Bottom section — Submissions List:
+  - Fetch all assignments from Supabase, ordered by submitted_at DESC
+  - Display as vertical list of cards, each showing:
+    → Student name
+    → Group name badge (soft colored pill)
+    → Tappable link "View Submission" → Linking.openURL()
+    → Submission date formatted as "March 14, 2025 · 3:42 PM"
+  - Show empty state illustration/text if no submissions yet
+
+---
+
+## 📄 SCREEN 3: PROFILE TAB
+
+If not logged in: show Login / Sign Up forms (tabs or toggle)
+If logged in:
+  - Display email (read-only)
+  - Editable: Full Name, LinkedIn URL, Current Position
+  - "Save Changes" button → updates Supabase profiles table
+  - "Log Out" button at bottom
+  - Show success toast on save
+
+---
+
+## 🔐 AUTH
+
+- Use Supabase Auth (email + password)
+- On sign-up: create a row in profiles table via trigger or client-side insert
+- Store session with AsyncStorage via Supabase's AsyncStorage adapter:
+  import AsyncStorage from '@react-native-async-storage/async-storage'
+- Redirect unauthenticated users to the Profile tab (login screen)
+- All other tabs visible but prompt login for actions
+
+---
+
+## ✅ POLISH & UX REQUIREMENTS
+
+- All external links use Linking.openURL() from expo
+- Pull-to-refresh on Sessions and Assignments lists
+- Loading spinners (ActivityIndicator) on all async operations
+- Error messages displayed inline (not just console.log)
+- Empty states with friendly copy for sessions and assignments
+- Keyboard-aware scrolling on all forms (KeyboardAvoidingView)
+- Safe area handling (SafeAreaView or useSafeAreaInsets)
+- Toast notifications for all user actions
+- App works fully offline-tolerant for viewing (cached data)
