@@ -7,7 +7,6 @@ import {
   DMSans_500Medium,
   DMSans_700Bold,
 } from '@expo-google-fonts/dm-sans';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
@@ -20,8 +19,6 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
-
-const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   return (
@@ -56,14 +53,12 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <RootLayoutNav />
-              <Toast />
-            </GestureHandlerRootView>
-          </AuthProvider>
-        </QueryClientProvider>
+        <AuthProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <RootLayoutNav />
+            <Toast />
+          </GestureHandlerRootView>
+        </AuthProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
   );
