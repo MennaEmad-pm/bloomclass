@@ -7,16 +7,22 @@ import {
   DMSans_500Medium,
   DMSans_700Bold,
 } from '@expo-google-fonts/dm-sans';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import React, { useEffect } from 'react';
+import { Platform, UIManager } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AuthProvider } from '@/contexts/AuthContext';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -30,6 +36,8 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
+    ...Ionicons.font,
+    ...Feather.font,
     PlayfairDisplay_400Regular,
     PlayfairDisplay_700Bold,
     DMSans_400Regular,
@@ -46,9 +54,11 @@ export default function RootLayout() {
   useEffect(() => {
     const timer = setTimeout(() => {
       SplashScreen.hideAsync().catch(() => {});
-    }, 3000);
+    }, 4000);
     return () => clearTimeout(timer);
   }, []);
+
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <SafeAreaProvider>

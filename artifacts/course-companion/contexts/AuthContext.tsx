@@ -22,14 +22,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) {
-        fetchProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        if (session) {
+          fetchProfile(session.user.id);
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch(() => setLoading(false));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);

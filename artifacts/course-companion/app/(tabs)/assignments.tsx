@@ -39,13 +39,18 @@ export default function AssignmentsScreen() {
   }, [profile]);
 
   const fetchAssignments = useCallback(async () => {
-    const { data } = await supabase
-      .from('assignments')
-      .select('*')
-      .order('submitted_at', { ascending: false });
-    setAssignments(data ?? []);
-    setLoadingList(false);
-    setRefreshing(false);
+    try {
+      const { data } = await supabase
+        .from('assignments')
+        .select('*')
+        .order('submitted_at', { ascending: false });
+      setAssignments(data ?? []);
+    } catch (_e) {
+      // silently ignore network errors
+    } finally {
+      setLoadingList(false);
+      setRefreshing(false);
+    }
   }, []);
 
   useEffect(() => { fetchAssignments(); }, [fetchAssignments]);
