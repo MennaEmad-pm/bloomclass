@@ -36,3 +36,9 @@ export type Assignment = {
   task_link: string;
   submitted_at: string;
 };
+
+export type CourseRule = {
+  id: number;
+  text: string;
+  order_index: number;
+};

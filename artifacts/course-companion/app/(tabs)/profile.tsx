@@ -55,7 +55,19 @@ export default function ProfileScreen() {
     const { error } = await signIn(email.trim(), password);
     setAuthLoading(false);
     if (error) {
-      Toast.show({ type: 'error', text1: 'Login failed', text2: error.message });
+      const msg = error.message ?? '';
+      if (msg.toLowerCase().includes('email') && msg.toLowerCase().includes('confirm')) {
+        Toast.show({
+          type: 'error',
+          text1: 'Email not confirmed',
+          text2: 'Check your inbox and click the confirmation link, then try again.',
+          visibilityTime: 6000,
+        });
+      } else if (msg.toLowerCase().includes('invalid')) {
+        Toast.show({ type: 'error', text1: 'Wrong email or password', text2: 'Please double-check your credentials.' });
+      } else {
+        Toast.show({ type: 'error', text1: 'Login failed', text2: msg });
+      }
     }
   };
 
@@ -70,7 +82,12 @@ export default function ProfileScreen() {
     if (error) {
       Toast.show({ type: 'error', text1: 'Sign up failed', text2: error.message });
     } else {
-      Toast.show({ type: 'success', text1: 'Account created!', text2: 'Welcome to Course Companion' });
+      Toast.show({
+        type: 'success',
+        text1: 'Account created!',
+        text2: 'Check your email inbox to confirm your account, then log in.',
+        visibilityTime: 8000,
+      });
     }
   };
 

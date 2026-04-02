@@ -43,12 +43,31 @@ INSERT INTO public.sessions (id, title) VALUES
   (5, 'Session 5')
 ON CONFLICT (id) DO NOTHING;
 
+-- 4. Course Rules table (editable by admin)
+CREATE TABLE IF NOT EXISTS public.course_rules (
+  id SERIAL PRIMARY KEY,
+  text TEXT NOT NULL,
+  order_index INTEGER NOT NULL
+);
+
+INSERT INTO public.course_rules (text, order_index) VALUES
+  ('Respect all participants and maintain a safe, inclusive space.', 1),
+  ('Be punctual — join sessions on time and notify if you''ll be late.', 2),
+  ('Keep your camera on during live sessions when possible.', 3),
+  ('Engage actively: ask questions, participate in discussions.', 4),
+  ('Submit assignments before stated deadlines.', 5),
+  ('No plagiarism — all work must be your own or properly attributed.', 6),
+  ('Be constructive in feedback, both giving and receiving.', 7),
+  ('Keep course materials confidential.', 8)
+ON CONFLICT DO NOTHING;
+
 -- =============================================
 -- Row Level Security
 -- =============================================
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.assignments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.course_rules ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: anyone can read, users update their own
 CREATE POLICY "profiles_select" ON public.profiles FOR SELECT USING (true);
@@ -65,6 +84,15 @@ CREATE POLICY "sessions_update" ON public.sessions FOR UPDATE USING (
 CREATE POLICY "assignments_select" ON public.assignments FOR SELECT USING (true);
 CREATE POLICY "assignments_insert" ON public.assignments FOR INSERT
   WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Course Rules: anyone can read, only admins can modify
+CREATE POLICY "rules_select" ON public.course_rules FOR SELECT USING (true);
+CREATE POLICY "rules_insert" ON public.course_rules FOR INSERT
+  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
+CREATE POLICY "rules_update" ON public.course_rules FOR UPDATE
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
+CREATE POLICY "rules_delete" ON public.course_rules FOR DELETE
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
 
 -- =============================================
 -- Auto-create profile row when user signs up
