@@ -1,9 +1,19 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Linking, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { FONTS } from '@/constants/fonts';
 import { Assignment } from '@/lib/supabase';
+
+function openLink(raw: string) {
+  let url = raw.trim();
+  if (url && !/^https?:\/\//i.test(url)) {
+    url = 'https://' + url;
+  }
+  Linking.openURL(url).catch(() => {
+    Alert.alert('Could not open link', 'The URL may be invalid or your device has no app to handle it.');
+  });
+}
 
 const GROUP_COLORS = [
   '#C9748A', '#D4795A', '#C9A96E', '#7A9E9F', '#9B7BB8', '#5B8DB8',
@@ -51,7 +61,7 @@ export function AssignmentCard({ assignment }: Props) {
 
       <TouchableOpacity
         style={[styles.viewBtn, { borderColor: colors.primary }]}
-        onPress={() => Linking.openURL(assignment.task_link)}
+        onPress={() => openLink(assignment.task_link)}
         activeOpacity={0.7}
       >
         <Ionicons name="link-outline" size={14} color={colors.primary} />
