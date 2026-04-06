@@ -10,9 +10,9 @@ import {
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useFonts } from 'expo-font';
-import React, { useEffect } from 'react';
-import { Platform, UIManager } from 'react-native';
+import * as Font from 'expo-font';
+import React, { useEffect, useState } from 'react';
+import { Platform, UIManager, View, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
@@ -35,30 +35,57 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
-    ...Ionicons.font,
-    ...Feather.font,
-    PlayfairDisplay_400Regular,
-    PlayfairDisplay_700Bold,
-    DMSans_400Regular,
-    DMSans_500Medium,
-    DMSans_700Bold,
-  });
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync().catch(() => {});
+    let cancelled = false;
+
+    async function loadAll() {
+      try {
+        await Font.loadAsync({
+          // Load icon fonts explicitly using the library's own method
+          // so the family name is guaranteed to match what the component uses
+          ...Ionicons.font,
+          ...Feather.font,
+          PlayfairDisplay_400Regular,
+          PlayfairDisplay_700Bold,
+          DMSans_400Regular,
+          DMSans_500Medium,
+          DMSans_700Bold,
+        });
+      } catch (_e) {
+        // carry on — fonts may partially load; icons self-heal via componentDidMount
+      } finally {
+        if (!cancelled) {
+          setReady(true);
+          SplashScreen.hideAsync().catch(() => {});
+        }
+      }
     }
-  }, [fontsLoaded, fontError]);
 
-  useEffect(() => {
+    loadAll();
+
+    // Hard timeout: never block the UI for more than 4 seconds
     const timer = setTimeout(() => {
-      SplashScreen.hideAsync().catch(() => {});
+      if (!cancelled) {
+        setReady(true);
+        SplashScreen.hideAsync().catch(() => {});
+      }
     }, 4000);
-    return () => clearTimeout(timer);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, []);
 
-  if (!fontsLoaded && !fontError) return null;
+  if (!ready) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FAF3EE' }}>
+        <ActivityIndicator color="#C9748A" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaProvider>
