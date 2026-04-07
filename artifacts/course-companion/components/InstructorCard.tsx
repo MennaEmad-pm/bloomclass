@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
-import { Linkedin } from 'lucide-react-native';
+import { ExternalLink } from 'lucide-react-native';
 import { useColors } from '@/hooks/useColors';
 import { FONTS } from '@/constants/fonts';
 
@@ -36,7 +36,7 @@ export function InstructorCard() {
         onPress={openLinkedIn}
         activeOpacity={0.8}
       >
-        <Linkedin size={16} color={colors.primaryForeground} />
+        <ExternalLink size={16} color={colors.primaryForeground} />
         <Text style={[styles.linkedInText, { color: colors.primaryForeground, fontFamily: FONTS.bodyMedium }]}>
           LinkedIn Profile
         </Text>

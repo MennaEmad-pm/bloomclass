@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { List, Pencil, ChevronDown, ChevronUp, Trash2, PlusCircle } from 'lucide-react-native';
+import { List, Pencil, ChevronDown, ChevronUp, Trash2, CirclePlus } from 'lucide-react-native';
 import { useColors } from '@/hooks/useColors';
 import { FONTS } from '@/constants/fonts';
 import { supabase, CourseRule } from '@/lib/supabase';
@@ -202,7 +202,7 @@ export function CourseRules() {
               style={[styles.addBtn, { borderColor: colors.primary }]}
               onPress={addRule}
             >
-              <PlusCircle size={18} color={colors.primary} />
+              <CirclePlus size={18} color={colors.primary} />
               <Text style={[styles.addBtnText, { color: colors.primary, fontFamily: FONTS.bodyMedium }]}>
                 Add Rule
               </Text>
