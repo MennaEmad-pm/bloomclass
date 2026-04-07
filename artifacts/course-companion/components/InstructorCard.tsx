@@ -19,16 +19,16 @@ export function InstructorCard() {
         </View>
         <View style={styles.headerInfo}>
           <Text style={[styles.name, { color: colors.textDark, fontFamily: FONTS.heading }]}>
-            Menna Emad
+            Mennatallah
           </Text>
           <Text style={[styles.experience, { color: colors.textMuted, fontFamily: FONTS.body }]}>
-            12 years of experience
+            Senior Product Manager
           </Text>
         </View>
       </View>
 
       <Text style={[styles.bio, { color: colors.textMuted, fontFamily: FONTS.body }]}>
-        A seasoned professional with 12 years of experience, passionate about education and empowering the next generation of practitioners.
+        I'm Mennatallah, a Senior Product Manager with over 10 years of experience working across digital platforms. I've led products from early discovery through delivery, worked with cross-functional teams in fast-paced environments, and spent years mentoring other PMs along the way — which is what brings me here today.
       </Text>
 
       <TouchableOpacity
