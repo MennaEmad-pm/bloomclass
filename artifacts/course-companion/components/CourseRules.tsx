@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { List, Pencil, ChevronDown, ChevronUp, Trash2, PlusCircle } from 'lucide-react-native';
 import { useColors } from '@/hooks/useColors';
 import { FONTS } from '@/constants/fonts';
 import { supabase, CourseRule } from '@/lib/supabase';
@@ -100,7 +100,7 @@ export function CourseRules() {
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
         <TouchableOpacity style={styles.header} onPress={() => setExpanded(v => !v)} activeOpacity={0.7}>
           <View style={styles.titleRow}>
-            <Ionicons name="list-outline" size={20} color={colors.accent} />
+            <List size={20} color={colors.accent} />
             <Text style={[styles.title, { color: colors.textDark, fontFamily: FONTS.heading }]}>
               Course Rules
             </Text>
@@ -112,14 +112,13 @@ export function CourseRules() {
                 style={[styles.editBtn, { borderColor: colors.primary }]}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name="pencil-outline" size={14} color={colors.primary} />
+                <Pencil size={14} color={colors.primary} />
               </TouchableOpacity>
             )}
-            <Ionicons
-              name={expanded ? 'chevron-up' : 'chevron-down'}
-              size={18}
-              color={colors.textMuted}
-            />
+            {expanded
+              ? <ChevronUp size={18} color={colors.textMuted} />
+              : <ChevronDown size={18} color={colors.textMuted} />
+            }
           </View>
         </TouchableOpacity>
 
@@ -194,7 +193,7 @@ export function CourseRules() {
                   multiline
                 />
                 <TouchableOpacity onPress={() => deleteRule(index)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <Ionicons name="trash-outline" size={18} color="#E05858" />
+                  <Trash2 size={18} color="#E05858" />
                 </TouchableOpacity>
               </View>
             ))}
@@ -203,7 +202,7 @@ export function CourseRules() {
               style={[styles.addBtn, { borderColor: colors.primary }]}
               onPress={addRule}
             >
-              <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
+              <PlusCircle size={18} color={colors.primary} />
               <Text style={[styles.addBtnText, { color: colors.primary, fontFamily: FONTS.bodyMedium }]}>
                 Add Rule
               </Text>

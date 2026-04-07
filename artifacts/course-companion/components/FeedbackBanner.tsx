@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { MessageCircle, ArrowRight } from 'lucide-react-native';
 import { useColors } from '@/hooks/useColors';
 import { FONTS } from '@/constants/fonts';
 
@@ -17,7 +17,7 @@ export function FeedbackBanner() {
       activeOpacity={0.85}
     >
       <View style={styles.iconWrap}>
-        <Ionicons name="chatbubble-ellipses-outline" size={24} color={colors.card} />
+        <MessageCircle size={24} color={colors.card} />
       </View>
       <View style={styles.textWrap}>
         <Text style={[styles.label, { color: colors.card, fontFamily: FONTS.bodyBold }]}>
@@ -27,7 +27,7 @@ export function FeedbackBanner() {
           Help us improve the course for everyone
         </Text>
       </View>
-      <Ionicons name="arrow-forward" size={20} color={colors.card} />
+      <ArrowRight size={20} color={colors.card} />
     </TouchableOpacity>
   );
 }

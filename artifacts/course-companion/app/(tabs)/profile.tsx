@@ -12,7 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import Toast from 'react-native-toast-message';
-import { Ionicons } from '@expo/vector-icons';
+import { ShieldCheck, LogOut } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useColors } from '@/hooks/useColors';
 import { FONTS } from '@/constants/fonts';
@@ -231,7 +231,7 @@ export default function ProfileScreen() {
 
         {profile?.is_admin && (
           <View style={[styles.adminBadge, { backgroundColor: colors.accent + '22', borderColor: colors.accent + '44' }]}>
-            <Ionicons name="shield-checkmark" size={14} color={colors.accent} />
+            <ShieldCheck size={14} color={colors.accent} />
             <Text style={[styles.adminText, { color: colors.accent, fontFamily: FONTS.bodyMedium }]}>
               Administrator
             </Text>
@@ -290,7 +290,7 @@ export default function ProfileScreen() {
         onPress={signOut}
         activeOpacity={0.7}
       >
-        <Ionicons name="log-out-outline" size={18} color={colors.textMuted} />
+        <LogOut size={18} color={colors.textMuted} />
         <Text style={[styles.logoutText, { color: colors.textMuted, fontFamily: FONTS.bodyMedium }]}>
           Log Out
         </Text>

@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { X } from 'lucide-react-native';
 import Toast from 'react-native-toast-message';
 import { supabase, CourseSession } from '@/lib/supabase';
 import { useColors } from '@/hooks/useColors';
@@ -67,7 +67,7 @@ export function EditSessionModal({ session, visible, onClose, onSaved }: Props) 
               Edit Session {session.id}
             </Text>
             <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name="close" size={22} color={colors.textMuted} />
+              <X size={22} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 

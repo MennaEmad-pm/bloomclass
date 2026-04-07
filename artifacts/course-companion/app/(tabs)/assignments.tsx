@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import Toast from 'react-native-toast-message';
-import { Ionicons } from '@expo/vector-icons';
+import { Upload, FileText } from 'lucide-react-native';
 import { supabase, Assignment } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { AssignmentCard } from '@/components/AssignmentCard';
@@ -154,7 +154,7 @@ export default function AssignmentsScreen() {
             <ActivityIndicator color={colors.primaryForeground} size="small" />
           ) : (
             <>
-              <Ionicons name="cloud-upload-outline" size={18} color={colors.primaryForeground} />
+              <Upload size={18} color={colors.primaryForeground} />
               <Text style={[styles.submitBtnText, { color: colors.primaryForeground, fontFamily: FONTS.bodyBold }]}>
                 Submit Assignment
               </Text>
@@ -176,7 +176,7 @@ export default function AssignmentsScreen() {
 
       {!loadingList && assignments.length === 0 && (
         <View style={styles.center}>
-          <Ionicons name="document-outline" size={40} color={colors.border} />
+          <FileText size={40} color={colors.border} />
           <Text style={[styles.emptyText, { color: colors.textMuted, fontFamily: FONTS.body }]}>
             No submissions yet.{'\n'}Be the first to submit!
           </Text>

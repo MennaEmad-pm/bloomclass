@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Monitor, Pencil } from 'lucide-react-native';
 import { useColors } from '@/hooks/useColors';
 import { FONTS } from '@/constants/fonts';
 import { CourseSession } from '@/lib/supabase';
@@ -53,8 +53,7 @@ export function SessionCard({ session, isAdmin, onUpdate }: Props) {
             disabled={!hasPresentation}
             activeOpacity={0.8}
           >
-            <Ionicons
-              name="easel-outline"
+            <Monitor
               size={15}
               color={hasPresentation ? colors.primaryForeground : colors.textMuted}
             />
@@ -77,7 +76,7 @@ export function SessionCard({ session, isAdmin, onUpdate }: Props) {
               onPress={() => setEditOpen(true)}
               activeOpacity={0.7}
             >
-              <Ionicons name="pencil-outline" size={15} color={colors.primary} />
+              <Pencil size={15} color={colors.primary} />
               <Text style={[styles.editBtnText, { color: colors.primary, fontFamily: FONTS.bodyMedium }]}>
                 Edit
               </Text>

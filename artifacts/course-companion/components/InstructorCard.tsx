@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Linkedin } from 'lucide-react-native';
 import { useColors } from '@/hooks/useColors';
 import { FONTS } from '@/constants/fonts';
 
@@ -36,7 +36,7 @@ export function InstructorCard() {
         onPress={openLinkedIn}
         activeOpacity={0.8}
       >
-        <Ionicons name="logo-linkedin" size={16} color={colors.primaryForeground} />
+        <Linkedin size={16} color={colors.primaryForeground} />
         <Text style={[styles.linkedInText, { color: colors.primaryForeground, fontFamily: FONTS.bodyMedium }]}>
           LinkedIn Profile
         </Text>

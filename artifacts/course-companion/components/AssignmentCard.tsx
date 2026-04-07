@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Link } from 'lucide-react-native';
 import { useColors } from '@/hooks/useColors';
 import { FONTS } from '@/constants/fonts';
 import { Assignment } from '@/lib/supabase';
@@ -64,7 +64,7 @@ export function AssignmentCard({ assignment }: Props) {
         onPress={() => openLink(assignment.task_link)}
         activeOpacity={0.7}
       >
-        <Ionicons name="link-outline" size={14} color={colors.primary} />
+        <Link size={14} color={colors.primary} />
         <Text style={[styles.viewBtnText, { color: colors.primary, fontFamily: FONTS.bodyMedium }]}>
           View Submission
         </Text>
