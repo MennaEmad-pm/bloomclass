@@ -1,0 +1,178 @@
+Add a new feature to the Assignments tab that allows the admin to post assignment
+requirements, and allows students to link their submissions to a specific
+assignment post. Both types of content appear in a single unified list with
+distinct visual treatments.
+
+---
+
+## 🗄️ SUPABASE SCHEMA UPDATES
+
+Create a new table:
+
+assignment_posts:
+  - id (uuid, default: gen_random_uuid())
+  - title (text, not null)
+  - description (text, not null)
+  - posted_at (timestamp, default: now())
+  - posted_by (uuid, FK → auth.users)
+
+Alter the existing assignments table — add one new column:
+  - assignment_post_id (uuid, nullable, FK → assignment_posts.id, on delete set null)
+
+The assignment_post_id is nullable to preserve backward compatibility with
+any existing submissions made before this feature.
+
+RLS Policies for assignment_posts:
+  - All authenticated users can read
+  - Only admin (is_admin = true in profiles) can insert/update/delete
+
+---
+
+## 📱 ASSIGNMENTS TAB — ADMIN VIEW
+
+At the top of the Assignments tab, if the logged-in user is admin, show:
+  Label: "+ Post New Assignment"
+  Style: filled button, primary color (#C9748A), full width, bold label
+
+Tapping it opens a bottom sheet modal or full modal screen with:
+  - Field 1: Assignment Name (text input, required)
+  - Field 2: Assignment Description (multiline text input, min 4 lines, required)
+  - "Post Assignment" submit button
+  - "Cancel" button
+  - Validate both fields before submitting
+  - On success: dismiss modal, show toast "Assignment posted!", refresh list
+
+Admin cannot edit or delete posts in this version (read-only after posting).
+
+---
+
+## 📝 STUDENT SUBMISSION FORM CHANGES
+
+Add a new field at the TOP of the submission form:
+
+  Label: "Responding to"
+  Component: A horizontally scrollable row of selectable pill/chip buttons
+             OR a styled modal selector
+
+  - Fetch all assignment_posts from Supabase ordered by posted_at DESC
+  - Each option displays the assignment title
+  - One must be selected before the form can be submitted
+  - If no assignment posts exist yet, show:
+    "No assignments posted yet. Check back soon!"
+    and disable the submission form entirely
+  - If only one assignment post exists, auto-select it by default
+
+  Selected pill style:
+    Background: '#C9748A', text: white, no border
+
+  Unselected pill style:
+    Background: '#FAF3EE', text: '#C9748A', border: 1px solid '#C9748A'
+
+  - If assignment_posts list is loading, show ActivityIndicator in this field
+  - On submit: save the selected assignment_post_id with the rest of the
+    submission fields into the assignments table
+
+---
+
+## 📋 UNIFIED ASSIGNMENTS LIST
+
+Merge both assignment_posts and assignments into a single chronological list,
+sorted by date descending (newest first).
+
+Fetch both in parallel:
+
+  const [postsResult, submissionsResult] = await Promise.all([
+    supabase
+      .from('assignment_posts')
+      .select('*')
+      .order('posted_at', { ascending: false }),
+    supabase
+      .from('assignments')
+      .select(`
+        *,
+        assignment_posts (
+          id,
+          title
+        )
+      `)
+      .order('submitted_at', { ascending: false })
+  ]);
+
+Map each item to a unified shape with a "type" field:
+  - type: 'admin_post'          → from assignment_posts, sort by posted_at
+  - type: 'student_submission'  → from assignments, sort by submitted_at
+
+Merge into one array, sort by date descending, render with a single FlatList.
+Use a renderItem function that checks item.type and returns the correct card.
+
+---
+
+## 🟣 CARD TYPE A — Admin Assignment Post
+
+Visual treatment:
+  - Full-width card with warm gradient background:
+    LinearGradient from '#C9748A' (dusty rose) → '#D4795A' (terracotta)
+  - All text in white (#FFFAF7)
+  - Top label badge: "📌 New Assignment" in a semi-transparent white pill
+  - Assignment title: Playfair Display, 20px, bold, white
+  - Description: DM Sans, 14px, white at 0.9 opacity, multiline
+  - Bottom row:
+    Left: "Posted by Menna Emad · [formatted date]" — white, 0.7 opacity, 12px
+    Right: "[X] student submission(s)" — white, 0.7 opacity, 12px
+      (count by filtering merged list for submissions where
+      assignment_post_id === this post's id — show "No submissions yet" if 0)
+  - Decorative gold (#C9A96E) left border or top accent line (3px)
+  - Vertical padding: 24px
+  - Shadow: shadowColor: '#C9748A', shadowOpacity: 0.25
+
+---
+
+## ⬜ CARD TYPE B — Student Submission
+
+If assignment_post_id is not null, show a reference tag at the TOP of the card:
+
+  [ ↩ In response to: "Assignment Title Here" ]
+
+  Style:
+    - Full width of card
+    - Background: '#FDF0EC' (light terracotta tint)
+    - Left border: 3px solid '#D4795A' (terracotta)
+    - Text: "In response to: [title]" — DM Sans, 12px, '#D4795A', italic
+    - Icon prefix: ↩ or 📎
+    - Small gap between this tag and the rest of the card content
+
+  Use the joined assignment_posts.title from the Supabase query — no second
+  request needed per card.
+
+  If assignment_post_id is null (legacy submission): no tag shown, card renders
+  exactly as before.
+
+  If the linked post was deleted (assignment_post_id present but join returns
+  null): show "In response to: [Assignment Removed]" in muted gray (#8C6B72)
+  instead of crashing.
+
+Remainder of card (unchanged):
+  - Student name, group name badge, tappable submission link, formatted date
+  - White/warm surface background, standard soft shadow
+
+---
+
+## ✅ EDGE CASES TO HANDLE
+
+  - Deleted assignment post → show "[Assignment Removed]" gracefully in gray
+  - No assignment posts exist → disable student form with friendly message
+  - Only one post exists → auto-select it in the student form
+  - Legacy submissions (null assignment_post_id) → render without reference tag
+  - Pull-to-refresh reloads both tables together
+  - Empty state: if no posts AND no submissions, show a friendly empty state
+
+---
+
+## ✅ ADDITIONAL RULES
+
+  - Admin post cards do NOT show a group badge or submission link field
+  - Student submission form remains below the "+ Post New Assignment" button
+    (admin sees both the post button and the submission form)
+  - All list rendering uses a single FlatList with the merged sorted array
+  - Use Supabase join query (nested select) to get linked title in one request —
+    do not make a separate query per submission card

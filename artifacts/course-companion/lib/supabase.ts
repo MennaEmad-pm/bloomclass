@@ -29,12 +29,22 @@ export type CourseSession = {
   notes: string | null;
 };
 
+export type AssignmentPost = {
+  id: string;
+  title: string;
+  description: string;
+  posted_at: string;
+  posted_by: string | null;
+};
+
 export type Assignment = {
   id: string;
   student_name: string;
   group_name: string;
   task_link: string;
   submitted_at: string;
+  assignment_post_id: string | null;
+  assignment_posts: { id: string; title: string } | null;
 };
 
 export type CourseRule = {

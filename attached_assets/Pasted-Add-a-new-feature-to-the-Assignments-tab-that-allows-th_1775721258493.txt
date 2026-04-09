@@ -1,0 +1,105 @@
+Add a new feature to the Assignments tab that allows the admin to post assignment
+requirements. These posts appear in the same assignments list but are visually
+distinct from student submissions.
+
+---
+
+## 🗄️ SUPABASE SCHEMA UPDATE
+
+Add a new table:
+
+assignment_posts:
+  - id (uuid, default: gen_random_uuid())
+  - title (text, not null)
+  - description (text, not null)
+  - posted_at (timestamp, default: now())
+  - posted_by (uuid, FK → auth.users)
+
+RLS Policies:
+  - All authenticated users can read assignment_posts
+  - Only admin (is_admin = true in profiles) can insert/update/delete
+
+---
+
+## 📱 ASSIGNMENTS TAB CHANGES
+
+### Admin View — New "Post Assignment" Button
+
+At the top of the Assignments tab, if the logged-in user is admin, show a
+prominent button:
+  Label: "+ Post New Assignment"
+  Style: filled button using primary color (#C9748A), full width, bold label
+
+Tapping it opens a bottom sheet modal or full modal screen with:
+  - Field 1: Assignment Name (text input, required)
+  - Field 2: Assignment Description (multiline text input, min 4 lines, required)
+  - "Post Assignment" submit button
+  - "Cancel" button
+  - Validate both fields before submitting
+  - On success: dismiss modal, show toast "Assignment posted!", refresh list
+
+---
+
+## 📋 UNIFIED ASSIGNMENTS LIST
+
+Merge both assignment_posts (from admin) and assignments (from students) into a
+single chronological list, sorted by date descending (newest first).
+
+Each item in the list is one of two card types:
+
+---
+
+### 🟣 Card Type A — Admin Assignment Post
+
+Visual treatment:
+  - Full-width card with a rich warm gradient background:
+    LinearGradient from '#C9748A' (dusty rose) to '#D4795A' (terracotta)
+  - All text in white (#FFFAF7)
+  - A top label badge: "📌 New Assignment" in a semi-transparent white pill
+  - Assignment title in Playfair Display, large (20px), bold, white
+  - Description text in DM Sans, 14px, white with 0.9 opacity, multiline
+  - Bottom row: small text "Posted by Menna Emad · [formatted date]" in white
+    with 0.7 opacity
+  - A decorative thin gold (#C9A96E) left border or top accent line
+  - Slightly larger card with more vertical padding (24px) than student cards
+  - Subtle shadow with rose tint: shadowColor: '#C9748A', shadowOpacity: 0.25
+
+---
+
+### ⬜ Card Type B — Student Submission (existing style, no changes)
+
+Keep the existing student submission card style:
+  - White/warm surface background
+  - Student name, group badge, submission link, date
+  - Standard soft shadow
+
+---
+
+## 🔀 MERGING THE TWO LISTS
+
+Fetch both tables from Supabase in parallel using Promise.all():
+
+  const [postsResult, submissionsResult] = await Promise.all([
+    supabase.from('assignment_posts').select('*').order('posted_at', { ascending: false }),
+    supabase.from('assignments').select('*').order('submitted_at', { ascending: false })
+  ]);
+
+Map each item to a unified shape with a "type" field:
+  - type: 'admin_post' → from assignment_posts, use posted_at for sorting
+  - type: 'student_submission' → from assignments, use submitted_at for sorting
+
+Merge into one array and sort by date descending before rendering.
+
+Use a renderItem function that checks item.type and returns the correct card
+component (AdminPostCard or StudentSubmissionCard).
+
+---
+
+## ✅ ADDITIONAL REQUIREMENTS
+
+- Admin post cards must NOT show an assignment link or group badge
+- Student submission form remains unchanged and still appears below the
+  "+ Post New Assignment" button (admin sees both; students only see the form)
+- Pull-to-refresh must reload both lists together
+- Empty state: if no posts AND no submissions, show friendly empty state
+- Admin can NOT edit or delete posts in this version (read-only after posting)

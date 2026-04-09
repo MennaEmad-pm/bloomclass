@@ -23,13 +23,23 @@ CREATE TABLE IF NOT EXISTS public.sessions (
   notes TEXT
 );
 
--- 3. Assignments table
+-- 3. Assignment Posts table (admin-posted assignments)
+CREATE TABLE IF NOT EXISTS public.assignment_posts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  posted_at TIMESTAMPTZ DEFAULT NOW(),
+  posted_by UUID REFERENCES auth.users ON DELETE SET NULL
+);
+
+-- 4. Assignments table (student submissions)
 CREATE TABLE IF NOT EXISTS public.assignments (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   student_name TEXT NOT NULL,
   group_name TEXT NOT NULL,
   task_link TEXT NOT NULL,
-  submitted_at TIMESTAMPTZ DEFAULT NOW()
+  submitted_at TIMESTAMPTZ DEFAULT NOW(),
+  assignment_post_id UUID REFERENCES public.assignment_posts(id) ON DELETE SET NULL
 );
 
 -- =============================================
@@ -66,6 +76,7 @@ ON CONFLICT DO NOTHING;
 -- =============================================
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.assignment_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.course_rules ENABLE ROW LEVEL SECURITY;
 
@@ -79,6 +90,15 @@ CREATE POLICY "sessions_select" ON public.sessions FOR SELECT USING (true);
 CREATE POLICY "sessions_update" ON public.sessions FOR UPDATE USING (
   EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
 );
+
+-- Assignment Posts: anyone can read, only admins can insert/update/delete
+CREATE POLICY "aposts_select" ON public.assignment_posts FOR SELECT USING (true);
+CREATE POLICY "aposts_insert" ON public.assignment_posts FOR INSERT
+  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
+CREATE POLICY "aposts_update" ON public.assignment_posts FOR UPDATE
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
+CREATE POLICY "aposts_delete" ON public.assignment_posts FOR DELETE
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
 
 -- Assignments: anyone can read, authenticated users can insert
 CREATE POLICY "assignments_select" ON public.assignments FOR SELECT USING (true);
@@ -117,3 +137,26 @@ CREATE TRIGGER on_auth_user_created
 -- she has signed up with her account:
 -- UPDATE public.profiles SET is_admin = true WHERE email = 'her-email@example.com';
 -- =============================================
+
+-- =============================================
+-- MIGRATION — run this if you already had the
+-- assignments table before the assignment_posts
+-- feature was added:
+-- =============================================
+-- CREATE TABLE IF NOT EXISTS public.assignment_posts (
+--   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--   title TEXT NOT NULL,
+--   description TEXT NOT NULL,
+--   posted_at TIMESTAMPTZ DEFAULT NOW(),
+--   posted_by UUID REFERENCES auth.users ON DELETE SET NULL
+-- );
+-- ALTER TABLE public.assignment_posts ENABLE ROW LEVEL SECURITY;
+-- CREATE POLICY "aposts_select" ON public.assignment_posts FOR SELECT USING (true);
+-- CREATE POLICY "aposts_insert" ON public.assignment_posts FOR INSERT
+--   WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
+-- CREATE POLICY "aposts_update" ON public.assignment_posts FOR UPDATE
+--   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
+-- CREATE POLICY "aposts_delete" ON public.assignment_posts FOR DELETE
+--   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true));
+-- ALTER TABLE public.assignments
+--   ADD COLUMN IF NOT EXISTS assignment_post_id UUID REFERENCES public.assignment_posts(id) ON DELETE SET NULL;
