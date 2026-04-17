@@ -19,13 +19,13 @@ jobs:
       - name: Remove old lockfiles
         run: rm -f package-lock.json pnpm-lock.yaml yarn.lock
 
-      - name: Install dependencies and generate lockfile
-        run: npm install --package-lock-only --legacy-peer-deps
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
 
       - name: Commit lockfile
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add package-lock.json
-          git commit -m "generate package-lock.json"
+          git commit -m "generate full package-lock.json"
           git push
