@@ -1,0 +1,25 @@
+name: Generate lockfile
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies and generate lockfile
+        run: npm install --package-lock-only
+
+      - name: Commit lockfile
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add package-lock.json
+          git commit -m "generate package-lock.json"
+          git push
